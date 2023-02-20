@@ -2,6 +2,8 @@
 
 Farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.
 
+// TODO: all commands examples
+
 ## How to start farmerbot
 
 - Make sure to start redis server, and get db address for example <localhost:6379>

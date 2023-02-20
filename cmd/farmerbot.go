@@ -128,8 +128,7 @@ func getDefaultFlags(cmd *cobra.Command) (network string, mnemonics string, redi
 	}
 
 	multiWriter := zerolog.MultiLevelWriter(os.Stdout, logFile)
-	logger = zerolog.New(multiWriter).With().Timestamp().Logger()
-	logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	logger = zerolog.New(multiWriter).With().Timestamp().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	redisAddr, err = cmd.Flags().GetString("redis")
 	if err != nil {
@@ -144,13 +143,13 @@ func getDefaultFlags(cmd *cobra.Command) (network string, mnemonics string, redi
 	logger.Debug().Msgf("redis address is: %v", redisAddr)
 
 	network, err = cmd.Flags().GetString("network")
-	// we use it for farm manager and it doesn't use network nor mnemonics so we return
-	if err.Error() == "flag accessed but not defined: network" {
-		err = nil
-		return
-	}
-
 	if err != nil {
+		// we use it for farm manager and it doesn't use network nor mnemonics so we return
+		if err.Error() == "flag accessed but not defined: network" {
+			err = nil
+			return
+		}
+
 		logger.Error().Err(err).Msgf("error in network input '%s'", network)
 		return
 	}
