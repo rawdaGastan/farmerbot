@@ -44,6 +44,7 @@ func NewNodeManager(network string, mnemonics string, address string, logger zer
 }
 
 // TODO: map nodes in db
+
 // Define defines a node
 func (n *NodeManager) Define(jsonContent []byte) error {
 	node, err := parser.ParseJSONIntoNode(jsonContent)

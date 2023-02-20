@@ -98,6 +98,7 @@ func (p *PowerManager) PowerOff(nodeID uint32) error {
 	return p.db.UpdatesNodes(node)
 }
 
+// PeriodicWakeup for waking up nodes daily
 func (p *PowerManager) PeriodicWakeup() error {
 	nodes, err := p.db.GetNodes()
 	if err != nil {
@@ -129,6 +130,7 @@ func (p *PowerManager) PeriodicWakeup() error {
 	return nil
 }
 
+// PowerManagement for power management nodes
 func (p *PowerManager) PowerManagement() error {
 	nodes, err := p.db.GetNodes()
 	if err != nil {
@@ -181,7 +183,7 @@ func (p *PowerManager) PowerManagement() error {
 					continue
 				}
 
-				nodesLeftOnline -= 1
+				nodesLeftOnline--
 				newUsedResources -= node.Resources.Used.HRU + node.Resources.Used.SRU + node.Resources.Used.MRU + node.Resources.Used.CRU
 				newTotalResources -= node.Resources.Total.HRU + node.Resources.Total.SRU + node.Resources.Total.MRU + node.Resources.Total.CRU
 				if 100*newUsedResources/newTotalResources < power.WakeUpThreshold {

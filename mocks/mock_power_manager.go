@@ -48,7 +48,6 @@ func (mr *MockPowerHandlerMockRecorder) Configure(power interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Configure", reflect.TypeOf((*MockPowerHandler)(nil).Configure), power)
 }
 
-
 // PowerOn mocks base method.
 func (m *MockPowerHandler) PowerOn(node models.Node) error {
 	m.ctrl.T.Helper()
@@ -62,7 +61,6 @@ func (mr *MockPowerHandlerMockRecorder) PowerOn(node interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PowerOn", reflect.TypeOf((*MockPowerHandler)(nil).PowerOn), node)
 }
-
 
 // PowerOff mocks base method.
 func (m *MockPowerHandler) PowerOff(node models.Node) error {
@@ -89,7 +87,6 @@ func (mr *MockPowerHandlerMockRecorder) PeriodicWakeup() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PeriodicWakeup", reflect.TypeOf((*MockPowerHandler)(nil).PeriodicWakeup))
 }
-
 
 // PowerManagement mocks base method.
 func (m *MockPowerHandler) PowerManagement() {

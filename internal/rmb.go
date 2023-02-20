@@ -164,12 +164,7 @@ func (n *rmbNodeClient) updateNode(ctx context.Context, node models.Node) error 
 // SystemVersion executes zos system version cmd
 func (n *rmbNodeClient) systemVersion(ctx context.Context, nodeTwin uint32) error {
 	const cmd = "zos.system.version"
-
-	if err := n.rmb.Call(ctx, nodeTwin, cmd, nil, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return n.rmb.Call(ctx, nodeTwin, cmd, nil, nil)
 }
 
 // NetworkHasPublicConfig returns the current public node network configuration. A node with a

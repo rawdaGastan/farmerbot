@@ -161,11 +161,7 @@ func (db *RedisDB) SaveConfig(config Config) error {
 		return err
 	}
 
-	if err := db.SetNodes(config.Nodes); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetNodes(config.Nodes)
 }
 
 // FilterOnNodes filters db ON nodes
