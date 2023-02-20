@@ -7,6 +7,9 @@ test:
 	@echo "Running Tests"
 	go test -v ./...
 
+build: 
+	go build -o bin/farmerbot main.go
+
 coverage: clean 
 	mkdir coverage
 	go test -v -vet=off ./... -coverprofile=coverage/coverage.out
