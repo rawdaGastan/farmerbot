@@ -1,4 +1,4 @@
-// Package models for farmerbot models.
+// Package models for farmerbot
 package models
 
 import (
@@ -8,6 +8,20 @@ import (
 
 	"github.com/go-redis/redis"
 )
+
+// RedisManager represents interface for redis DB actions
+type RedisManager interface {
+	GetFarm() (Farm, error)
+	GetPower() (Power, error)
+	GetNode(nodeID uint32) (Node, error)
+	GetNodes() ([]Node, error)
+	UpdatesNodes(node Node) error
+	SetNodes(nodes []Node) error
+	SetFarm(farm Farm) error
+	SetPower(power Power) error
+	SaveConfig(config Config) error
+	FilterOnNodes() ([]Node, error)
+}
 
 // Config is the configuration for farmerbot
 type Config struct {

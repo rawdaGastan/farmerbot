@@ -5,45 +5,28 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rawdaGastan/farmerbot/internal/constants"
 	"github.com/rawdaGastan/farmerbot/internal/models"
 	"github.com/rawdaGastan/farmerbot/internal/parser"
 	"github.com/rs/zerolog"
 	"github.com/threefoldtech/substrate-client"
 )
 
-// PowerHandler interface for mocks
-type PowerHandler interface {
-	Configure(power models.Power) error
-	PowerOn(node models.Node) error
-	PowerOff(node models.Node) error
-
-	PeriodicWakeup()
-	PowerManagement()
-}
-
 // PowerManager manages the power of nodes
 type PowerManager struct {
 	logger   zerolog.Logger
-	db       models.RedisDB
+	db       models.RedisManager
 	identity substrate.Identity
 	subConn  models.Sub
 }
 
 // NewPowerManager creates a new PowerManager
-func NewPowerManager(network string, mnemonics string, address string, logger zerolog.Logger) (PowerManager, error) {
-	substrateManager := substrate.NewManager(constants.SubstrateURLs[network]...)
-	subConn, err := substrateManager.Substrate()
-	if err != nil {
-		return PowerManager{}, err
-	}
-
+func NewPowerManager(mnemonics string, subConn models.Sub, db models.RedisManager, logger zerolog.Logger) (PowerManager, error) {
 	identity, err := substrate.NewIdentityFromSr25519Phrase(mnemonics)
 	if err != nil {
 		return PowerManager{}, err
 	}
 
-	return PowerManager{logger, models.NewRedisDB(address), identity, subConn}, nil
+	return PowerManager{logger, db, identity, subConn}, nil
 }
 
 // Configure configure a power
@@ -52,7 +35,6 @@ func (p *PowerManager) Configure(jsonContent []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to get power from json content %v", err)
 	}
-
 	p.logger.Debug().Msgf("power configuration threshold is %v, wake up time is %v", power.WakeUpThreshold, time.Time(power.PeriodicWakeup))
 	return p.db.SetPower(power)
 }
@@ -147,10 +129,7 @@ func (p *PowerManager) PowerManagement() error {
 		return nil
 	}
 
-	usedResources, totalResources, err := p.calculateResourceUsage()
-	if err != nil {
-		return err
-	}
+	usedResources, totalResources := calculateResourceUsage(nodes)
 	if totalResources == 0 {
 		return nil
 	}
@@ -201,12 +180,7 @@ func (p *PowerManager) PowerManagement() error {
 	return nil
 }
 
-func (p *PowerManager) calculateResourceUsage() (uint64, uint64, error) {
-	nodes, err := p.db.GetNodes()
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to get nodes from db with error: %v", err)
-	}
-
+func calculateResourceUsage(nodes []models.Node) (uint64, uint64) {
 	usedResources := models.Capacity{}
 	totalResources := models.Capacity{}
 
@@ -220,5 +194,5 @@ func (p *PowerManager) calculateResourceUsage() (uint64, uint64, error) {
 	used := usedResources.CRU + usedResources.HRU + usedResources.MRU + usedResources.SRU
 	total := totalResources.CRU + totalResources.HRU + totalResources.MRU + totalResources.SRU
 
-	return used, total, nil
+	return used, total
 }

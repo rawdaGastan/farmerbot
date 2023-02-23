@@ -5,7 +5,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/rawdaGastan/farmerbot/internal/constants"
 	manager "github.com/rawdaGastan/farmerbot/internal/managers"
 	"github.com/rawdaGastan/farmerbot/internal/models"
 	"github.com/rawdaGastan/farmerbot/internal/parser"
@@ -22,7 +21,7 @@ type FarmerBot struct {
 }
 
 // NewFarmerBot generates a new farmer bot
-func NewFarmerBot(configPath string, network string, mnemonics string, address string, logger zerolog.Logger) (FarmerBot, error) {
+func NewFarmerBot(configPath string, network string, mnemonics string, sub *substrate.Substrate, db models.RedisDB, logger zerolog.Logger) (FarmerBot, error) {
 	farmerBot := FarmerBot{}
 	jsonContent, err := parser.ReadFile(configPath)
 	if err != nil {
@@ -30,12 +29,6 @@ func NewFarmerBot(configPath string, network string, mnemonics string, address s
 	}
 
 	config, err := parser.ParseJSONIntoConfig(jsonContent)
-	if err != nil {
-		return farmerBot, err
-	}
-
-	substrateManager := substrate.NewManager(constants.SubstrateURLs[network]...)
-	sub, err := substrateManager.Substrate()
 	if err != nil {
 		return farmerBot, err
 	}
@@ -50,13 +43,12 @@ func NewFarmerBot(configPath string, network string, mnemonics string, address s
 		return farmerBot, err
 	}
 
-	db := models.NewRedisDB(address)
 	err = db.SaveConfig(config)
 	if err != nil {
 		return farmerBot, err
 	}
 
-	powerManager, err := manager.NewPowerManager(network, mnemonics, address, logger)
+	powerManager, err := manager.NewPowerManager(mnemonics, sub, &db, logger)
 	if err != nil {
 		return farmerBot, err
 	}

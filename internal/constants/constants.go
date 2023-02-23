@@ -1,7 +1,9 @@
 // Package constants for farmerbot constants
 package constants
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	//TimeoutPowerStateChange a timeout for changing nodes power

@@ -13,37 +13,23 @@ import (
 	"github.com/threefoldtech/substrate-client"
 )
 
-// NodeHandler interface for mocks
-type NodeHandler interface {
-	Define(node models.Node) error
-	FindNode(nodeOptions models.NodeOptions, nodesToExclude []uint) (models.Node, error)
-}
-
 // NodeManager manages nodes
 type NodeManager struct {
 	logger   zerolog.Logger
-	db       models.RedisDB
+	db       models.RedisManager
 	identity substrate.Identity
 	subConn  models.Sub
 }
 
 // NewNodeManager creates a new NodeManager
-func NewNodeManager(network string, mnemonics string, address string, logger zerolog.Logger) (NodeManager, error) {
-	substrateManager := substrate.NewManager(constants.SubstrateURLs[network]...)
-	subConn, err := substrateManager.Substrate()
-	if err != nil {
-		return NodeManager{}, err
-	}
-
+func NewNodeManager(mnemonics string, subConn models.Sub, db models.RedisManager, logger zerolog.Logger) (NodeManager, error) {
 	identity, err := substrate.NewIdentityFromSr25519Phrase(mnemonics)
 	if err != nil {
 		return NodeManager{}, err
 	}
 
-	return NodeManager{logger, models.NewRedisDB(address), identity, subConn}, nil
+	return NodeManager{logger, db, identity, subConn}, nil
 }
-
-// TODO: map nodes in db
 
 // Define defines a node
 func (n *NodeManager) Define(jsonContent []byte) error {

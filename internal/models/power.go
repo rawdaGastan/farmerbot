@@ -3,6 +3,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -29,7 +30,17 @@ func (d *WakeupDate) UnmarshalJSON(b []byte) error {
 
 // MarshalJSON marshals the wakeup date
 func (d WakeupDate) MarshalJSON() ([]byte, error) {
-	return json.Marshal(time.Time(d))
+	date := time.Time(d)
+
+	dayTime := "AM"
+	if date.Hour() >= 12 {
+		dayTime = "PM"
+		date = date.Add(time.Duration(-12) * time.Hour)
+	}
+
+	timeFormat := fmt.Sprintf("%02d:%02d%s", date.Hour(), date.Minute(), dayTime)
+	fmt.Printf("timeFormat: %v\n", timeFormat)
+	return json.Marshal(timeFormat)
 }
 
 // PeriodicWakeupStart returns periodic wakeup start date
@@ -39,5 +50,5 @@ func (d WakeupDate) PeriodicWakeupStart() time.Time {
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	return today.Local().Add(time.Hour*time.Duration(date.Hour()) +
 		time.Minute*time.Duration(date.Minute()) +
-		time.Second*time.Duration(date.Second()))
+		0)
 }

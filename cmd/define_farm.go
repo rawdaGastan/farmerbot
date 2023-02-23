@@ -2,6 +2,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	manager "github.com/rawdaGastan/farmerbot/internal/managers"
 	"github.com/rawdaGastan/farmerbot/internal/parser"
 	"github.com/spf13/cobra"
@@ -10,44 +12,36 @@ import (
 var defineFarmCmd = &cobra.Command{
 	Use:   "define",
 	Short: "define farmerbot farm",
-	Run: func(cmd *cobra.Command, args []string) {
-		_, _, redisAddr, logger, err := getDefaultFlags(cmd)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		_, _, _, db, logger, err := getDefaultFlags(cmd)
 		if err != nil {
-			logger.Error().Err(err)
-			return
+			return err
 		}
 
 		config, err := cmd.Flags().GetString("config")
 		if err != nil {
-			logger.Error().Err(err).Msgf("error in config file path input '%s'", config)
-			return
+			return fmt.Errorf("error %w in config file path input '%s'", err, config)
 		}
 		logger.Debug().Msgf("config path is: %v", config)
 
-		farmManager := manager.NewFarmManager(redisAddr, logger)
+		farmManager := manager.NewFarmManager(&db, logger)
 
 		jsonContent, err := parser.ReadFile(config)
 		if err != nil {
-			logger.Error().Err(err).Msgf("failed to read config file %s", config)
-			return
+			return fmt.Errorf("failed to read config file '%s' with error: %w", config, err)
 		}
 
 		err = farmManager.Define(jsonContent)
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to define farm")
-			return
+			return fmt.Errorf("failed to define farm with error: %w", err)
 		}
 
 		logger.Info().Msgf("Farm is defined successfully")
+		return nil
 	},
 }
 
 func init() {
 	cobra.OnInitialize()
-
 	defineFarmCmd.Flags().StringP("config", "c", "config.json", "Enter your config json file path")
-
-	defineFarmCmd.Flags().StringP("redis", "r", "", "The address of the redis db")
-	defineFarmCmd.Flags().BoolP("debug", "d", false, "By setting this flag the farmerbot will print debug logs too")
-	defineFarmCmd.Flags().StringP("log", "l", "farmerbot.log", "Enter your log file path to debug")
 }

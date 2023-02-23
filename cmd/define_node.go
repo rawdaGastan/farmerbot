@@ -2,6 +2,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	manager "github.com/rawdaGastan/farmerbot/internal/managers"
 	"github.com/rawdaGastan/farmerbot/internal/parser"
 	"github.com/spf13/cobra"
@@ -10,50 +12,39 @@ import (
 var defineNodeCmd = &cobra.Command{
 	Use:   "define",
 	Short: "define a new node",
-	Run: func(cmd *cobra.Command, args []string) {
-		network, mnemonics, redisAddr, logger, err := getDefaultFlags(cmd)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		subConn, _, mnemonics, db, logger, err := getDefaultFlags(cmd)
 		if err != nil {
-			logger.Error().Err(err)
-			return
+			return err
 		}
 
 		config, err := cmd.Flags().GetString("config")
 		if err != nil {
-			logger.Error().Err(err).Msgf("error in config file path input '%s'", config)
-			return
+			return fmt.Errorf("error %w in config file path input '%s'", err, config)
 		}
 		logger.Debug().Msgf("config path is: %v", config)
 
-		nodeManager, err := manager.NewNodeManager(network, mnemonics, redisAddr, logger)
+		nodeManager, err := manager.NewNodeManager(mnemonics, subConn, &db, logger)
 		if err != nil {
-			logger.Error().Err(err).Msg("node manager failed to start")
-			return
+			return fmt.Errorf("node manager failed to start with error: %w", err)
 		}
 
 		jsonContent, err := parser.ReadFile(config)
 		if err != nil {
-			logger.Error().Err(err).Msgf("failed to read config file %s", config)
-			return
+			return fmt.Errorf("failed to read config file '%s' with error: %w", config, err)
 		}
 
 		err = nodeManager.Define(jsonContent)
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to define node")
-			return
+			return fmt.Errorf("failed to define node with error: %w", err)
 		}
 
 		logger.Info().Msgf("Node is defined successfully")
+		return nil
 	},
 }
 
 func init() {
 	cobra.OnInitialize()
-
 	defineNodeCmd.Flags().StringP("config", "c", "config.json", "Enter your config json file path")
-
-	defineNodeCmd.Flags().StringP("network", "n", "dev", "The network to run on")
-	defineNodeCmd.Flags().StringP("mnemonics", "m", "", "The mnemonics of the farmer")
-	defineNodeCmd.Flags().StringP("redis", "r", "", "The address of the redis db")
-	defineNodeCmd.Flags().BoolP("debug", "d", false, "By setting this flag the farmerbot will print debug logs too")
-	defineNodeCmd.Flags().StringP("log", "l", "farmerbot.log", "Enter your log file path to debug")
 }

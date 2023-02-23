@@ -18,9 +18,9 @@ import (
 )
 
 // RMBClient is an rmb abstract client interface.
-/*type RMBClient interface {
+type RMBClient interface {
 	Call(ctx context.Context, twin uint32, fn string, data interface{}, result interface{}) error
-}*/
+}
 
 type rmbNodeClient struct {
 	logger zerolog.Logger

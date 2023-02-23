@@ -71,6 +71,7 @@ func (n *Node) SetNodePower(identity substrate.Identity, subConn Sub, on bool) e
 	}
 
 	// update nodes
+	n.PowerState.OFF = !on
 	n.PowerState.ShuttingDown = !on
 	n.PowerState.WakingUp = on
 	n.LastTimePowerStateChanged = time.Now()

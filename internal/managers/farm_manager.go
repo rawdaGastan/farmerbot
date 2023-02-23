@@ -9,20 +9,15 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// FarmHandler interface for mocks
-type FarmHandler interface {
-	Define(farm models.Farm) error
-}
-
 // FarmManager manages farms
 type FarmManager struct {
 	logger zerolog.Logger
-	db     models.RedisDB
+	db     models.RedisManager
 }
 
 // NewFarmManager creates a new FarmManager
-func NewFarmManager(address string, logger zerolog.Logger) FarmManager {
-	return FarmManager{logger, models.NewRedisDB(address)}
+func NewFarmManager(db models.RedisManager, logger zerolog.Logger) FarmManager {
+	return FarmManager{logger, db}
 }
 
 // Define defines a farm

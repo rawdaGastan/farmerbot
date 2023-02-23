@@ -3,7 +3,7 @@ package models
 
 // ConsumableResources for node resources
 type ConsumableResources struct {
-	OverProvisionCPU float64  `json:"OverProvisionCPU,omitempty"` // how much we allow over provisioning the CPU range: [1;3]
+	OverProvisionCPU float64  `json:"overProvisionCPU,omitempty"` // how much we allow over provisioning the CPU range: [1;4]
 	Total            Capacity `json:"total"`
 	Used             Capacity `json:"used,omitempty"`
 }
@@ -31,11 +31,10 @@ func (cap *Capacity) Add(add Capacity) {
 }
 
 // Subtract subtracts a new capacity
-func (cap *Capacity) subtract(add Capacity) (result Capacity) {
-	result.CRU = cap.CRU - add.CRU
-	result.MRU = cap.MRU - add.MRU
-	result.SRU = cap.SRU - add.SRU
-	result.HRU = cap.HRU - add.HRU
-
+func (cap *Capacity) subtract(sub Capacity) (result Capacity) {
+	result.CRU = cap.CRU - sub.CRU
+	result.MRU = cap.MRU - sub.MRU
+	result.SRU = cap.SRU - sub.SRU
+	result.HRU = cap.HRU - sub.HRU
 	return result
 }

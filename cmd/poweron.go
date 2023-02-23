@@ -2,6 +2,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	manager "github.com/rawdaGastan/farmerbot/internal/managers"
 	"github.com/spf13/cobra"
 )
@@ -9,43 +11,33 @@ import (
 var powerONCmd = &cobra.Command{
 	Use:   "poweron",
 	Short: "power on a node",
-	Run: func(cmd *cobra.Command, args []string) {
-		network, mnemonics, redisAddr, logger, err := getDefaultFlags(cmd)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		subConn, _, mnemonics, db, logger, err := getDefaultFlags(cmd)
 		if err != nil {
-			logger.Error().Err(err)
-			return
+			return err
 		}
 
 		nodeID, err := cmd.Flags().GetUint32("node")
 		if err != nil || nodeID == 0 {
-			logger.Error().Err(err).Msgf("error in node ID input %d", nodeID)
-			return
+			return fmt.Errorf("error %w in node ID input %d", err, nodeID)
 		}
 		logger.Debug().Msgf("node ID is: %v", nodeID)
 
-		powerManager, err := manager.NewPowerManager(network, mnemonics, redisAddr, logger)
+		powerManager, err := manager.NewPowerManager(mnemonics, subConn, &db, logger)
 		if err != nil {
-			logger.Error().Err(err).Msg("node manager failed to start")
-			return
+			return fmt.Errorf("power manager failed to start with error %w", err)
 		}
 
 		if err := powerManager.PowerOn(nodeID); err != nil {
-			logger.Error().Err(err).Msgf("failed to power on node %d", nodeID)
-			return
+			return fmt.Errorf("failed to power on node %d with error: %w", nodeID, err)
 		}
 
 		logger.Info().Msgf("Node %d is ON", nodeID)
+		return nil
 	},
 }
 
 func init() {
 	cobra.OnInitialize()
-
 	powerONCmd.Flags().Uint32P("node", "x", 0, "Enter your node ID to power on")
-
-	powerONCmd.Flags().StringP("network", "n", "dev", "The network to run on")
-	powerONCmd.Flags().StringP("mnemonics", "m", "", "The mnemonics of the farmer")
-	powerONCmd.Flags().StringP("redis", "r", "", "The address of the redis db")
-	powerONCmd.Flags().BoolP("debug", "d", false, "By setting this flag the farmerbot will print debug logs too")
-	powerONCmd.Flags().StringP("log", "l", "farmerbot.log", "Enter your log file path to debug")
 }

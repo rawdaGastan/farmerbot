@@ -227,7 +227,7 @@ func TestParsers(t *testing.T) {
 
 	t.Run("test invalid json node over provision CPU", func(t *testing.T) {
 		farmContent := `{ "ID": 1 }`
-		nodeContent := `{ "ID": 1, "twinID" : 1, "resources": { "OverProvisionCPU": 5, "total": { "SRU": 1, "CRU": 1, "HRU": 1, "CRU": 1 } } }`
+		nodeContent := `{ "ID": 1, "twinID" : 1, "resources": { "overProvisionCPU": 5, "total": { "SRU": 1, "CRU": 1, "HRU": 1, "CRU": 1 } } }`
 		powerContent := `{ "periodicWakeup": "08:30AM" }`
 		content := fmt.Sprintf(`
 		{ 
