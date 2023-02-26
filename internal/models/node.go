@@ -8,6 +8,7 @@ import (
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/threefoldtech/substrate-client"
+	"github.com/threefoldtech/zos/pkg"
 )
 
 // Node represents a node in a farm
@@ -19,11 +20,13 @@ type Node struct {
 	Certified                 bool                `json:"certified,omitempty"`
 	Dedicated                 bool                `json:"dedicated,omitempty"`
 	PublicConfig              bool                `json:"publicConfig,omitempty"`
+	HasActiveRentContract     bool                `json:"hasActiveRentContract,omitempty"`
 	PublicIPsUsed             uint64              `json:"publicIPsUsed,omitempty"`
 	WgPorts                   []uint16            `json:"wgPorts,omitempty"`
+	Pools                     []pkg.PoolMetrics   `json:"pools,omitempty"`
 	Resources                 ConsumableResources `json:"resources"`
 	PowerState                PowerState          `json:"powerState,omitempty"`
-	TimeoutClaimedResources   uint8               `json:"timeoutClaimedResources,omitempty"`
+	TimeoutClaimedResources   time.Time           `json:"timeoutClaimedResources,omitempty"`
 	LastTimePowerStateChanged time.Time           `json:"lastTimePowerStateChanged,omitempty"`
 	LastTimeAwake             time.Time           `json:"lastTimeAwake,omitempty"`
 }
@@ -48,6 +51,7 @@ type NodeOptions struct {
 // Sub is substrate client interface
 type Sub interface {
 	SetNodePowerState(identity substrate.Identity, up bool) (hash types.Hash, err error)
+	GetNodeRentContract(node uint32) (uint64, error)
 }
 
 // SetNodePower sets the node power
@@ -88,7 +92,7 @@ func (n *Node) UpdateResources(cap ConsumableResources) {
 
 // IsUnused node is an empty node
 func (n *Node) IsUnused() bool {
-	return n.Resources.Used.isEmpty()
+	return n.Resources.Used.isEmpty() && !n.HasActiveRentContract
 }
 
 // CanClaimResources checks if a node can claim some resources

@@ -12,6 +12,8 @@ import (
 	"github.com/threefoldtech/substrate-client"
 )
 
+// TODO: add a msg bus for all commands
+
 // FarmerBot for managing farms
 type FarmerBot struct {
 	logger        zerolog.Logger
@@ -33,12 +35,7 @@ func NewFarmerBot(configPath string, network string, mnemonics string, sub *subs
 		return farmerBot, err
 	}
 
-	identity, err := substrate.NewIdentityFromSr25519Phrase(mnemonics)
-	if err != nil {
-		return farmerBot, err
-	}
-
-	rmbNodeClient, err := newRmbNodeClient(*sub, identity, network, logger)
+	rmbNodeClient, err := newRmbNodeClient(sub, mnemonics, network, logger)
 	if err != nil {
 		return farmerBot, err
 	}
@@ -108,6 +105,7 @@ func (f *FarmerBot) Run(ctx context.Context) {
 			f.logger.Error().Err(err).Msgf("failed to perform periodic wake up")
 		}
 
+		// TODO: add commands for power management and PeriodicWakeup
 		// power management
 		f.logger.Debug().Msg("check power management")
 		err = f.powerManager.PowerManagement()

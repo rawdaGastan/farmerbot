@@ -1,6 +1,6 @@
 # Farmerbot
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/dc1cd40b31324ff1b80d9706b08837e8)](https://www.codacy.com/gh/rawdaGastan/farmerbot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rawdaGastan/farmerbot&amp;utm_campaign=Badge_Grade) <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-82%25-brightgreen.svg?longCache=true&style=flat)</a> [![Dependabot](https://badgen.net/badge/Dependabot/enabled/green?icon=dependabot)](https://dependabot.com/)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/dc1cd40b31324ff1b80d9706b08837e8)](https://www.codacy.com/gh/rawdaGastan/farmerbot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rawdaGastan/farmerbot&amp;utm_campaign=Badge_Grade) <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-80%25-brightgreen.svg?longCache=true&style=flat)</a>
 
 Farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.
 

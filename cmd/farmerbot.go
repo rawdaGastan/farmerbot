@@ -22,7 +22,8 @@ import (
 var farmerBotCmd = &cobra.Command{
 	Use:   "farmerbot",
 	Short: "Run farmerbot to manage your farms",
-	Long:  `Farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.`,
+	// TODO: add version and get version
+	Long: `Welcome to the farmerbot (v0.0.0). The farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		subConn, network, mnemonics, db, logger, err := getDefaultFlags(cmd)
 		if err != nil {
@@ -47,17 +48,17 @@ var farmerBotCmd = &cobra.Command{
 
 var nodeManagerCmd = &cobra.Command{
 	Use:   "nodemanager",
-	Short: "node manager command",
+	Short: "node manager for node commands",
 }
 
 var farmManagerCmd = &cobra.Command{
 	Use:   "farmmanager",
-	Short: "farm manager command",
+	Short: "farm manager for farm commands",
 }
 
 var powerManagerCmd = &cobra.Command{
 	Use:   "powermanager",
-	Short: "power manager command",
+	Short: "power manager for power commands",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -84,19 +85,18 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize()
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	farmerBotCmd.Flags().StringP("config", "c", "config.json", "Enter your config json file path")
+	farmerBotCmd.Flags().StringP("config", "c", "config.json", "enter your config json file path")
 
-	farmerBotCmd.PersistentFlags().StringP("network", "n", "dev", "The network to run on")
-	farmerBotCmd.PersistentFlags().StringP("mnemonics", "m", "", "The mnemonics of the farmer")
-	farmerBotCmd.PersistentFlags().StringP("redis", "r", "", "The address of the redis db")
-	farmerBotCmd.PersistentFlags().BoolP("debug", "d", false, "By setting this flag the farmerbot will print debug logs too")
-	farmerBotCmd.PersistentFlags().StringP("log", "l", "farmerbot.log", "Enter your log file path to debug")
+	farmerBotCmd.PersistentFlags().StringP("network", "n", "dev", "the grid network to run on")
+	farmerBotCmd.PersistentFlags().StringP("mnemonics", "m", "", "the mnemonics of the farmer")
+	farmerBotCmd.PersistentFlags().StringP("redis", "r", "", "the address of the redis db")
+	farmerBotCmd.PersistentFlags().BoolP("debug", "d", false, "by setting this flag the farmerbot will print debug logs too")
+	farmerBotCmd.PersistentFlags().StringP("log", "l", "farmerbot.log", "enter your log file path to debug")
 }
 
 func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network string, mnemonics string, db models.RedisDB, logger zerolog.Logger, err error) {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
 	var debug bool
 	debug, err = cmd.Flags().GetBool("debug")
 	if err != nil {
@@ -140,7 +140,7 @@ func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network 
 	}
 
 	if len(strings.TrimSpace(redisAddr)) == 0 {
-		logger.Error().Msg("redis address is required")
+		err = fmt.Errorf("redis address is required")
 		return
 	}
 	logger.Debug().Msgf("redis address is: %v", redisAddr)
@@ -174,7 +174,7 @@ func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network 
 	}
 
 	if len(strings.TrimSpace(mnemonics)) == 0 {
-		logger.Error().Msg("mnemonics is required")
+		err = fmt.Errorf("mnemonics is required")
 		return
 	}
 	logger.Debug().Msgf("mnemonics is: %v", mnemonics)

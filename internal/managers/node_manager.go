@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/rawdaGastan/farmerbot/internal/constants"
 	"github.com/rawdaGastan/farmerbot/internal/models"
@@ -75,6 +76,10 @@ func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []
 			continue
 		}
 
+		if node.HasActiveRentContract {
+			continue
+		}
+
 		if nodeOptions.Dedicated && (!node.Dedicated || !node.IsUnused()) {
 			continue
 		}
@@ -106,8 +111,8 @@ func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []
 	n.logger.Debug().Msgf("Found a node: %d", nodeFounded.ID)
 
 	// claim the resources until next update of the data
-	// add a timeout (after 6 rounds of update we update the resources, 30 minutes)
-	nodeFounded.TimeoutClaimedResources = constants.TimeoutClaimedResources
+	// add a timeout (after 30 minutes we update the resources)
+	nodeFounded.TimeoutClaimedResources = time.Now().Add(constants.TimeoutPowerStateChange)
 	if nodeOptions.Dedicated {
 		// claim all capacity
 		nodeFounded.ClaimResources(nodeFounded.Resources.Total)

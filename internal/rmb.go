@@ -7,14 +7,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/patrickmn/go-cache"
-	"github.com/pkg/errors"
 	"github.com/rawdaGastan/farmerbot/internal/constants"
 	"github.com/rawdaGastan/farmerbot/internal/models"
 	"github.com/rs/zerolog"
 	"github.com/threefoldtech/rmb-sdk-go"
 	"github.com/threefoldtech/rmb-sdk-go/direct"
 	"github.com/threefoldtech/substrate-client"
+	"github.com/threefoldtech/zos/pkg"
 )
 
 // RMBClient is an rmb abstract client interface.
@@ -25,12 +24,12 @@ type RMBClient interface {
 type rmbNodeClient struct {
 	logger zerolog.Logger
 	rmb    rmb.Client //RMBClient
+	sub    models.Sub
 }
 
-func newRmbNodeClient(sub substrate.Substrate, identity substrate.Identity, network string, logger zerolog.Logger) (rmbNodeClient, error) {
+func newRmbNodeClient(sub *substrate.Substrate, mnemonics string, network string, logger zerolog.Logger) (rmbNodeClient, error) {
 	sessionID := fmt.Sprintf("tf-%d", os.Getpid())
-	db := newTwinDB(sub)
-	rmbClient, err := direct.NewClient(context.Background(), identity, constants.RelayURLS[network], sessionID, db)
+	rmbClient, err := direct.NewClient("sr25519", mnemonics, constants.RelayURLS[network], sessionID, sub)
 	if err != nil {
 		return rmbNodeClient{}, fmt.Errorf("failed with error: %w, couldn't create rmb client", err)
 	}
@@ -38,49 +37,6 @@ func newRmbNodeClient(sub substrate.Substrate, identity substrate.Identity, netw
 	return rmbNodeClient{
 		rmb: rmbClient,
 	}, nil
-}
-
-type twinDB struct {
-	cache *cache.Cache
-	sub   substrate.Substrate
-}
-
-// newTwinDB creates a new twinDBImpl instance, with a non expiring cache.
-func newTwinDB(sub substrate.Substrate) direct.TwinDB {
-	return &twinDB{
-		cache: cache.New(cache.NoExpiration, cache.NoExpiration),
-		sub:   sub,
-	}
-}
-
-// Get gets Twin from cache if present. if not, gets it from substrate client and caches it.
-func (t *twinDB) Get(id uint32) (direct.Twin, error) {
-	cachedValue, ok := t.cache.Get(fmt.Sprint(id))
-	if ok {
-		return cachedValue.(direct.Twin), nil
-	}
-
-	twin, err := t.sub.GetTwin(id)
-	if err != nil {
-		return direct.Twin{}, errors.Wrapf(err, "could not get twin of twin with id %d", id)
-	}
-
-	directTwin := direct.Twin{
-		ID:        id,
-		PublicKey: twin.Account.PublicKey(),
-	}
-
-	err = t.cache.Add(fmt.Sprint(id), directTwin, cache.DefaultExpiration)
-	if err != nil {
-		return direct.Twin{}, errors.Wrapf(err, "could not set cache for twin with id %d", id)
-	}
-
-	return directTwin, nil
-}
-
-// GetByPk returns a twin's id using its public key
-func (t *twinDB) GetByPk(pk []byte) (uint32, error) {
-	return t.sub.GetTwinByPubKey(pk)
 }
 
 // PingNode checks state of the node
@@ -136,14 +92,27 @@ func (n *rmbNodeClient) pingNode(ctx context.Context, node models.Node) (bool, e
 
 // UpdateNode updates the node statistics
 func (n *rmbNodeClient) updateNode(ctx context.Context, node models.Node) error {
-	if node.TimeoutClaimedResources == 0 {
+	if node.TimeoutClaimedResources.Before(time.Now()) {
 		stats, err := n.statistics(ctx, node.TwinID)
 		if err != nil {
 			return fmt.Errorf("failed to get statistics of node %d with error: %w", node.ID, err)
 		}
 		node.UpdateResources(stats)
-	} else {
-		node.TimeoutClaimedResources--
+
+		pools, err := n.getStoragePools(ctx, node.TwinID)
+		if err != nil {
+			return fmt.Errorf("failed to update storage pools of node %d with error: %w", node.ID, err)
+		}
+		node.Pools = pools
+
+		rentContract, err := n.sub.GetNodeRentContract(node.ID)
+		if err != nil {
+			return fmt.Errorf("failed to update contracts of node %d with error: %w", node.ID, err)
+		}
+
+		if rentContract != 0 {
+			node.HasActiveRentContract = true
+		}
 	}
 
 	node.PublicConfig = n.networkHasPublicConfig(ctx, node.TwinID)
@@ -157,8 +126,15 @@ func (n *rmbNodeClient) updateNode(ctx context.Context, node models.Node) error 
 	}
 	node.WgPorts = wgPorts
 
-	n.logger.Debug().Msgf("capacity updated for node %d:\n%v", node.ID, node.Resources)
+	n.logger.Debug().Msgf("capacity updated for node %d:\n%v\nhas active rent contract: %v", node.ID, node.Resources, node.HasActiveRentContract)
 	return nil
+}
+
+// GetStoragePools executes zos system version cmd
+func (n *rmbNodeClient) getStoragePools(ctx context.Context, nodeTwin uint32) (pools []pkg.PoolMetrics, err error) {
+	const cmd = "zos.storage.pools"
+	err = n.rmb.Call(ctx, nodeTwin, cmd, nil, &pools)
+	return pools, err
 }
 
 // SystemVersion executes zos system version cmd

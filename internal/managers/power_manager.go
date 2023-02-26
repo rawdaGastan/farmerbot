@@ -165,7 +165,12 @@ func (p *PowerManager) PowerManagement() error {
 				nodesLeftOnline--
 				newUsedResources -= node.Resources.Used.HRU + node.Resources.Used.SRU + node.Resources.Used.MRU + node.Resources.Used.CRU
 				newTotalResources -= node.Resources.Total.HRU + node.Resources.Total.SRU + node.Resources.Total.MRU + node.Resources.Total.CRU
-				if 100*newUsedResources/newTotalResources < power.WakeUpThreshold {
+				if newTotalResources == 0 {
+					break
+				}
+
+				resourceUsage := 100 * newUsedResources / newTotalResources
+				if resourceUsage < power.WakeUpThreshold {
 					// we need to keep the resource percentage lower than the threshold
 					p.logger.Debug().Msgf("too low resource usage: %d. Turning off unused node %d", resourceUsage, node.ID)
 					if err := p.PowerOff(node.ID); err != nil {
@@ -186,6 +191,11 @@ func calculateResourceUsage(nodes []models.Node) (uint64, uint64) {
 
 	for _, node := range nodes {
 		if node.PowerState.ON {
+			if node.HasActiveRentContract {
+				usedResources.Add(node.Resources.Used)
+			} else {
+				usedResources.Add(node.Resources.Used)
+			}
 			usedResources.Add(node.Resources.Used)
 			totalResources.Add(node.Resources.Total)
 		}

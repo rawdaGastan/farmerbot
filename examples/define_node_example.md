@@ -14,6 +14,7 @@
     "dedicated": "<if node is dedicated, optional>",
     "publicConfig": "<if node has public config, optional>",
     "publicIPsUsed": "<number of node used public ips, optional>",
+    "hasActiveRentContract": "<if node has an active rent contract, optional>",
     "wgPorts": "<list of node wireguard ports, optional>",
     "resources": {
         "overProvisionCPU": "<how much node allow over provisioning the CPU , default is 1, range: [1;4], optional>",
@@ -30,7 +31,7 @@
         "off": "<if node power state is off, optional>",
         "shuttingDown": "<if node power state is shutting down, optional>"
     },
-    "timeoutClaimedResources": "<number of rounds to delay updating claim resources from node, default is 6, optional>",
+    "timeoutClaimedResources": "<timeout to update claiming resources from node, default is after 30 minutes, optional>",
     "lastTimePowerStateChanged": "<last time node power changed, optional>",
     "lastTimeAwake": "<last time node was waking up, optional>",
 }

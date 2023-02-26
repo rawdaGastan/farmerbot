@@ -49,3 +49,20 @@ func (mr *MockSubMockRecorder) SetNodePowerState(identity, up interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetNodePowerState", reflect.TypeOf((*MockSub)(nil).SetNodePowerState), identity, up)
 }
+
+
+
+// GetNodeRentContract mocks base method.
+func (m *MockSub) GetNodeRentContract(node uint32) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNodeRentContract", node)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNodeRentContract indicates an expected call of GetNodeRentContract.
+func (mr *MockSubMockRecorder) GetNodeRentContract(node uint32) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeRentContract", reflect.TypeOf((*MockSub)(nil).GetNodeRentContract), node)
+}

@@ -19,7 +19,7 @@ var powerOFFCmd = &cobra.Command{
 
 		nodeID, err := cmd.Flags().GetUint32("node")
 		if err != nil || nodeID == 0 {
-			return fmt.Errorf("error %w in node ID input %d", err, nodeID)
+			return fmt.Errorf("error %v in node ID input %d", err, nodeID)
 		}
 		logger.Debug().Msgf("node ID is: %v", nodeID)
 

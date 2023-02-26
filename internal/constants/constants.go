@@ -9,9 +9,6 @@ const (
 	//TimeoutPowerStateChange a timeout for changing nodes power
 	TimeoutPowerStateChange = time.Minute * 30
 
-	//TimeoutClaimedResources a number of rounds to delay claims updates
-	TimeoutClaimedResources = 6
-
 	//DefaultWakeUpThreshold default threshold to wake up a new node
 	DefaultWakeUpThreshold = uint64(80)
 	//MinWakeUpThreshold min threshold to wake up a new node

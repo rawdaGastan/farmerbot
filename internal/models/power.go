@@ -39,7 +39,6 @@ func (d WakeupDate) MarshalJSON() ([]byte, error) {
 	}
 
 	timeFormat := fmt.Sprintf("%02d:%02d%s", date.Hour(), date.Minute(), dayTime)
-	fmt.Printf("timeFormat: %v\n", timeFormat)
 	return json.Marshal(timeFormat)
 }
 
