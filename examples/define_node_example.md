@@ -1,7 +1,7 @@
 # How to use define node command
 
-- Get your redis DB address used in farmerbot
-- Create a new json file `config.json` and add your node configurations (some are required):
+-   Get your redis DB address used in farmerbot
+-   Create a new json file `config.json` and add your node configurations (some are required):
 
 ```json
 {
@@ -37,7 +37,7 @@
 }
 ```
 
-- Then use the following code:
+-   Then use the following code:
 
 ```go
 // Package main

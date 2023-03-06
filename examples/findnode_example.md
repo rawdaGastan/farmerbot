@@ -1,7 +1,7 @@
 # How to use findnode command
 
-- Get your redis DB address used in farmerbot
-- Create a new json file `config.json` and add your node options configurations:
+-   Get your redis DB address used in farmerbot
+-   Create a new json file `config.json` and add your node options configurations:
 
 ```json
 {
@@ -18,7 +18,7 @@
 }
 ```
 
-- Then use the following code:
+-   Then use the following code:
 
 ```go
 // Package main

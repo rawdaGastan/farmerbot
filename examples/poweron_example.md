@@ -1,8 +1,8 @@
 # How to use poweron command
 
-- Get your redis DB address used in farmerbot
-- Get your desired node for example: 1
-- Then use the following code:
+-   Get your redis DB address used in farmerbot
+-   Get your desired node for example: 1
+-   Then use the following code:
 
 ```go
 // Package main
