@@ -1,6 +1,6 @@
 // Package cmd for farmerbot commands
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 RAWDA GASTAN
 */
 package cmd
 
@@ -18,17 +18,20 @@ import (
 	"github.com/threefoldtech/substrate-client"
 )
 
+var version = "v0.0.0"
+
 // farmerBotCmd represents the root base command when called without any subcommands
 var farmerBotCmd = &cobra.Command{
 	Use:   "farmerbot",
 	Short: "Run farmerbot to manage your farms",
-	// TODO: add version and get version
-	Long: `Welcome to the farmerbot (v0.0.0). The farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.`,
+	Long:  fmt.Sprintf(`Welcome to the farmerbot (%v). The farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.`, version),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		subConn, network, mnemonics, db, logger, err := getDefaultFlags(cmd)
+		subConn, network, mnemonics, redisAddr, logger, err := getDefaultFlags(cmd)
 		if err != nil {
 			return err
 		}
+
+		db := models.NewRedisDB(redisAddr)
 
 		config, err := cmd.Flags().GetString("config")
 		if err != nil {
@@ -46,35 +49,11 @@ var farmerBotCmd = &cobra.Command{
 	},
 }
 
-var nodeManagerCmd = &cobra.Command{
-	Use:   "nodemanager",
-	Short: "node manager for node commands",
-}
-
-var farmManagerCmd = &cobra.Command{
-	Use:   "farmmanager",
-	Short: "farm manager for farm commands",
-}
-
-var powerManagerCmd = &cobra.Command{
-	Use:   "powermanager",
-	Short: "power manager for power commands",
-}
-
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	farmerBotCmd.AddCommand(nodeManagerCmd)
-	farmerBotCmd.AddCommand(farmManagerCmd)
-	farmerBotCmd.AddCommand(powerManagerCmd)
-
-	nodeManagerCmd.AddCommand(findNodeCmd)
-	powerManagerCmd.AddCommand(powerONCmd)
-	powerManagerCmd.AddCommand(powerOFFCmd)
-
-	nodeManagerCmd.AddCommand(defineNodeCmd)
-	farmManagerCmd.AddCommand(defineFarmCmd)
-	powerManagerCmd.AddCommand(configurePowerCmd)
+	farmerBotCmd.AddCommand(serverCmd)
+	farmerBotCmd.AddCommand(versionCmd)
 
 	err := farmerBotCmd.Execute()
 	if err != nil {
@@ -96,7 +75,7 @@ func init() {
 	farmerBotCmd.PersistentFlags().StringP("log", "l", "farmerbot.log", "enter your log file path to debug")
 }
 
-func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network string, mnemonics string, db models.RedisDB, logger zerolog.Logger, err error) {
+func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network string, mnemonics string, redisAddr string, logger zerolog.Logger, err error) {
 	var debug bool
 	debug, err = cmd.Flags().GetBool("debug")
 	if err != nil {
@@ -133,7 +112,7 @@ func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network 
 	multiWriter := zerolog.MultiLevelWriter(os.Stdout, logFile)
 	logger = zerolog.New(multiWriter).With().Timestamp().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	redisAddr, err := cmd.Flags().GetString("redis")
+	redisAddr, err = cmd.Flags().GetString("redis")
 	if err != nil {
 		logger.Error().Err(err).Msgf("error in redis address input '%s'", redisAddr)
 		return
@@ -144,8 +123,6 @@ func getDefaultFlags(cmd *cobra.Command) (subConn *substrate.Substrate, network 
 		return
 	}
 	logger.Debug().Msgf("redis address is: %v", redisAddr)
-
-	db = models.NewRedisDB(redisAddr)
 
 	network, err = cmd.Flags().GetString("network")
 	if err != nil {

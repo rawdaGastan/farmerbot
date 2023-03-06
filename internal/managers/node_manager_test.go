@@ -2,7 +2,6 @@
 package manager
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -58,28 +57,14 @@ func TestNodeManager(t *testing.T) {
 	t.Run("test valid define node", func(t *testing.T) {
 		db.EXPECT().UpdatesNodes(node).Return(nil)
 
-		nodeBytes, err := json.Marshal(node)
-		assert.NoError(t, err)
-
-		err = nodeManager.Define(nodeBytes)
+		err = nodeManager.Define(node)
 		assert.NoError(t, err)
 	})
 
 	t.Run("test invalid define node: db failed", func(t *testing.T) {
 		db.EXPECT().UpdatesNodes(node).Return(fmt.Errorf("error"))
 
-		nodeBytes, err := json.Marshal(node)
-		assert.NoError(t, err)
-
-		err = nodeManager.Define(nodeBytes)
-		assert.Error(t, err)
-	})
-
-	t.Run("test invalid define node: wrong input", func(t *testing.T) {
-		nodeBytes, err := json.Marshal("node")
-		assert.NoError(t, err)
-
-		err = nodeManager.Define(nodeBytes)
+		err = nodeManager.Define(node)
 		assert.Error(t, err)
 	})
 
@@ -87,7 +72,7 @@ func TestNodeManager(t *testing.T) {
 		db.EXPECT().GetNodes().Return([]models.Node{node, node}, nil)
 		db.EXPECT().GetFarm().Return(testFarm, nil)
 
-		node, err = nodeManager.FindNode(nodeOptions, []uint{})
+		_, err = nodeManager.FindNode(nodeOptions, []uint{})
 		assert.NoError(t, err)
 	})
 
@@ -100,7 +85,7 @@ func TestNodeManager(t *testing.T) {
 
 		sub.EXPECT().SetNodePowerState(nodeManager.identity, true)
 
-		node, err = nodeManager.FindNode(models.NodeOptions{}, []uint{})
+		_, err = nodeManager.FindNode(models.NodeOptions{}, []uint{})
 		assert.NoError(t, err)
 	})
 
@@ -118,6 +103,7 @@ func TestNodeManager(t *testing.T) {
 	})
 
 	t.Run("test invalid find node: no more public ips", func(t *testing.T) {
+		testFarm.PublicIPs = 0
 		db.EXPECT().GetNodes().Return([]models.Node{node}, nil)
 		db.EXPECT().GetFarm().Return(testFarm, nil)
 
@@ -171,11 +157,13 @@ func TestNodeManager(t *testing.T) {
 	})
 
 	t.Run("test invalid find node: node cannot claim resources", func(t *testing.T) {
+		node.Resources.Total = models.Capacity{}
 		db.EXPECT().GetNodes().Return([]models.Node{node}, nil)
 		db.EXPECT().GetFarm().Return(testFarm, nil)
 
 		_, err = nodeManager.FindNode(models.NodeOptions{Capacity: nodeCapacity}, []uint{})
 		assert.Error(t, err)
+		node.Resources.Total = nodeCapacity
 	})
 
 	t.Run("test valid find node: both are dedicated and node is unused", func(t *testing.T) {

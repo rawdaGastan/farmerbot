@@ -2,7 +2,6 @@
 package manager
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -33,28 +32,14 @@ func TestFarmManager(t *testing.T) {
 	t.Run("test valid define farm", func(t *testing.T) {
 		db.EXPECT().SetFarm(testFarm).Return(nil)
 
-		farmBytes, err := json.Marshal(testFarm)
-		assert.NoError(t, err)
-
-		err = farmManager.Define(farmBytes)
+		err := farmManager.Define(testFarm)
 		assert.NoError(t, err)
 	})
 
 	t.Run("test invalid define farm: db failed", func(t *testing.T) {
 		db.EXPECT().SetFarm(testFarm).Return(fmt.Errorf("error"))
 
-		farmBytes, err := json.Marshal(testFarm)
-		assert.NoError(t, err)
-
-		err = farmManager.Define(farmBytes)
-		assert.Error(t, err)
-	})
-
-	t.Run("test invalid define farm: wrong input", func(t *testing.T) {
-		farmBytes, err := json.Marshal("farm")
-		assert.NoError(t, err)
-
-		err = farmManager.Define(farmBytes)
+		err := farmManager.Define(testFarm)
 		assert.Error(t, err)
 	})
 }

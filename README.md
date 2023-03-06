@@ -1,6 +1,6 @@
 # Farmerbot
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/dc1cd40b31324ff1b80d9706b08837e8)](https://www.codacy.com/gh/rawdaGastan/farmerbot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rawdaGastan/farmerbot&amp;utm_campaign=Badge_Grade) <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-80%25-brightgreen.svg?longCache=true&style=flat)</a>
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/dc1cd40b31324ff1b80d9706b08837e8)](https://www.codacy.com/gh/rawdaGastan/farmerbot/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rawdaGastan/farmerbot&amp;utm_campaign=Badge_Grade) <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-79%25-brightgreen.svg?longCache=true&style=flat)</a>
 
 Farmerbot is a service that a farmer can run allowing him to automatically manage the nodes of his farm.
 
@@ -62,6 +62,14 @@ Where:
 
 > Note: **`30 minutes`** are set for a timeout node power change
 
+## Server
+
+You can start farmerbot server with the following command
+
+```bash
+farmerbot server -m <mnemonics> -n <grid network> -r <redis address> -d <debug> -l <log file>
+```
+
 ## Supported commands
 
 - farmerbot powermanager [configure](/examples/configure_power_example.md)
@@ -73,6 +81,24 @@ Where:
 - farmerbot nodemanager [findnode](/examples/findnode_example.md)
 
 For more examples and explanations for supported commands, see the [examples](/examples)
+
+## Examples
+
+To run examples:
+
+- Run the [server](#server) then:
+
+```bash
+go run examples/example.go
+```
+
+## Version
+
+You can get the latest version of the farmerbot by running the following command:
+
+```bash
+farmerbot version
+```
 
 ## Test
 

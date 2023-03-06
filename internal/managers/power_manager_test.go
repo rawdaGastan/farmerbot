@@ -2,7 +2,6 @@
 package manager
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -41,28 +40,14 @@ func TestPowerManager(t *testing.T) {
 	t.Run("test valid configure power", func(t *testing.T) {
 		db.EXPECT().SetPower(power).Return(nil)
 
-		powerBytes, err := json.Marshal(power)
-		assert.NoError(t, err)
-
-		err = powerManager.Configure(powerBytes)
+		err = powerManager.Configure(power)
 		assert.NoError(t, err)
 	})
 
 	t.Run("test invalid configure power: db failed", func(t *testing.T) {
 		db.EXPECT().SetPower(power).Return(fmt.Errorf("error"))
 
-		powerBytes, err := json.Marshal(power)
-		assert.NoError(t, err)
-
-		err = powerManager.Configure(powerBytes)
-		assert.Error(t, err)
-	})
-
-	t.Run("test invalid configure power: wrong input", func(t *testing.T) {
-		powerBytes, err := json.Marshal("power")
-		assert.NoError(t, err)
-
-		err = powerManager.Configure(powerBytes)
+		err = powerManager.Configure(power)
 		assert.Error(t, err)
 	})
 

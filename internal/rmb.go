@@ -14,6 +14,7 @@ import (
 	"github.com/threefoldtech/rmb-sdk-go/direct"
 	"github.com/threefoldtech/substrate-client"
 	"github.com/threefoldtech/zos/pkg"
+	"github.com/threefoldtech/zos/pkg/gridtypes"
 )
 
 // RMBClient is an rmb abstract client interface.
@@ -158,11 +159,15 @@ func (n *rmbNodeClient) networkHasPublicConfig(ctx context.Context, nodeTwin uin
 // statistics returns some node statistics. Including total and available cpu, memory, storage, etc...
 func (n *rmbNodeClient) statistics(ctx context.Context, nodeTwin uint32) (result models.ConsumableResources, err error) {
 	const cmd = "zos.statistics.get"
-
-	if err = n.rmb.Call(ctx, nodeTwin, cmd, nil, &result); err != nil {
+	var res struct {
+		Total gridtypes.Capacity `json:"total"`
+		Used  gridtypes.Capacity `json:"used"`
+	}
+	if err = n.rmb.Call(ctx, nodeTwin, cmd, nil, &res); err != nil {
 		return
 	}
-
+	result.Total = models.Capacity{HRU: uint64(res.Total.HRU), SRU: uint64(res.Total.SRU), CRU: res.Total.CRU, MRU: uint64(res.Total.MRU), Ipv4: res.Total.IPV4U}
+	result.Used = models.Capacity{HRU: uint64(res.Used.HRU), SRU: uint64(res.Used.SRU), CRU: res.Used.CRU, MRU: uint64(res.Used.MRU), Ipv4: res.Used.IPV4U}
 	return result, nil
 }
 

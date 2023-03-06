@@ -9,7 +9,6 @@ import (
 
 	"github.com/rawdaGastan/farmerbot/internal/constants"
 	"github.com/rawdaGastan/farmerbot/internal/models"
-	"github.com/rawdaGastan/farmerbot/internal/parser"
 	"github.com/rs/zerolog"
 	"github.com/threefoldtech/substrate-client"
 )
@@ -33,26 +32,21 @@ func NewNodeManager(mnemonics string, subConn models.Sub, db models.RedisManager
 }
 
 // Define defines a node
-func (n *NodeManager) Define(jsonContent []byte) error {
-	node, err := parser.ParseJSONIntoNode(jsonContent)
-	if err != nil {
-		return fmt.Errorf("failed to get node from json content: %v", err)
-	}
-
+func (n *NodeManager) Define(node models.Node) error {
 	n.logger.Debug().Msgf("node is %+v", node)
 	return n.db.UpdatesNodes(node)
 }
 
 // FindNode finds an available node in the farm
-func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []uint) (models.Node, error) {
+func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []uint) (uint32, error) {
 	nodes, err := n.db.GetNodes()
 	if err != nil {
-		return models.Node{}, errors.New("failed to get nodes from db")
+		return 0, errors.New("failed to get nodes from db")
 	}
 
 	farm, err := n.db.GetFarm()
 	if err != nil {
-		return models.Node{}, errors.New("failed to get farm from db")
+		return 0, errors.New("failed to get farm from db")
 	}
 
 	if nodeOptions.PublicIPs > 0 {
@@ -62,7 +56,7 @@ func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []
 			publicIPsUsedByNodes += node.PublicIPsUsed
 		}
 		if publicIPsUsedByNodes+nodeOptions.PublicIPs > farm.PublicIPs {
-			return models.Node{}, fmt.Errorf("no more public ips available for farm %d", farm.ID)
+			return 0, fmt.Errorf("no more public ips available for farm %d", farm.ID)
 		}
 	}
 
@@ -99,7 +93,7 @@ func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []
 	}
 
 	if len(possibleNodes) == 0 {
-		return models.Node{}, fmt.Errorf("could not find a suitable node with the given options: %v", possibleNodes)
+		return 0, fmt.Errorf("could not find a suitable node with the given options: %v", possibleNodes)
 	}
 
 	// Sort the nodes on power state (the ones that are ON first)
@@ -126,10 +120,10 @@ func (n *NodeManager) FindNode(nodeOptions models.NodeOptions, nodesToExclude []
 	}
 
 	if err := n.powerOn(nodeFounded); err != nil {
-		return models.Node{}, err
+		return 0, err
 	}
 
-	return nodeFounded, nil
+	return nodeFounded.ID, nil
 }
 
 // PowerOn power on a node

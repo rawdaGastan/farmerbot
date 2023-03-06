@@ -2,10 +2,7 @@
 package manager
 
 import (
-	"fmt"
-
 	"github.com/rawdaGastan/farmerbot/internal/models"
-	"github.com/rawdaGastan/farmerbot/internal/parser"
 	"github.com/rs/zerolog"
 )
 
@@ -21,12 +18,7 @@ func NewFarmManager(db models.RedisManager, logger zerolog.Logger) FarmManager {
 }
 
 // Define defines a farm
-func (f *FarmManager) Define(jsonContent []byte) error {
-	farm, err := parser.ParseJSONIntoFarm(jsonContent)
-	if err != nil {
-		return fmt.Errorf("failed to get farm from json content: %v", err)
-	}
-
+func (f *FarmManager) Define(farm models.Farm) error {
 	f.logger.Debug().Msgf("farm is %+v", farm)
 	return f.db.SetFarm(farm)
 }

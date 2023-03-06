@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/rawdaGastan/farmerbot/internal/models"
-	"github.com/rawdaGastan/farmerbot/internal/parser"
 	"github.com/rs/zerolog"
 	"github.com/threefoldtech/substrate-client"
 )
@@ -30,11 +29,7 @@ func NewPowerManager(mnemonics string, subConn models.Sub, db models.RedisManage
 }
 
 // Configure configure a power
-func (p *PowerManager) Configure(jsonContent []byte) error {
-	power, err := parser.ParseJSONIntoPower(jsonContent)
-	if err != nil {
-		return fmt.Errorf("failed to get power from json content %v", err)
-	}
+func (p *PowerManager) Configure(power models.Power) error {
 	p.logger.Debug().Msgf("power configuration threshold is %v, wake up time is %v", power.WakeUpThreshold, time.Time(power.PeriodicWakeup))
 	return p.db.SetPower(power)
 }
