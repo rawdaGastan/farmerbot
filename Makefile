@@ -7,10 +7,15 @@ test:
 	@echo "Running Tests"
 	go test -v ./...
 
+build: 
+	go build -o bin/farmerbot main.go
+
 coverage: clean 
 	mkdir coverage
 	go test -v -vet=off ./... -coverprofile=coverage/coverage.out
 	go tool cover -html=coverage/coverage.out -o coverage/coverage.html
+	@${GOPATH}/bin/gopherbadger -png=false -md="README.md"
+	rm coverage.out
 
 clean:
 	rm ./coverage -rf
