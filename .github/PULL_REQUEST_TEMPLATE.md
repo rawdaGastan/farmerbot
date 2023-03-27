@@ -8,7 +8,7 @@ List of related issues
 
 ### Checklist
 
-- [ ] Tests included
-- [ ] Build pass
-- [ ] Documentation
-- [ ] Code format and docstring
+-   [ ] Tests included
+-   [ ] Build pass
+-   [ ] Documentation
+-   [ ] Code format and docstring
