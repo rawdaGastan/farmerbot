@@ -10,7 +10,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.2
 	github.com/threefoldtech/rmb-sdk-go v1.0.0
-	github.com/threefoldtech/substrate-client v0.1.3
+	github.com/threefoldtech/substrate-client v0.1.5
 	github.com/threefoldtech/zbus v1.0.1
 	github.com/threefoldtech/zos v0.5.6-0.20230305131034-18b87fe47852
 )
