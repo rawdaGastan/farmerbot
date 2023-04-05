@@ -7,7 +7,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/rs/zerolog v1.29.0
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.2
 	github.com/threefoldtech/rmb-sdk-go v1.0.0
 	github.com/threefoldtech/substrate-client v0.1.3
