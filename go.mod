@@ -9,7 +9,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.2
-	github.com/threefoldtech/rmb-sdk-go v1.0.0
+	github.com/threefoldtech/rmb-sdk-go v1.0.1
 	github.com/threefoldtech/substrate-client v0.1.3
 	github.com/threefoldtech/zbus v1.0.1
 	github.com/threefoldtech/zos v0.5.6-0.20230305131034-18b87fe47852
@@ -48,6 +48,7 @@ require (
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/threefoldtech/tfchain/clients/tfchain-client-go v0.0.0-20230425112357-f35e342c2193 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
